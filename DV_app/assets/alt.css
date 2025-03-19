@@ -1,0 +1,47 @@
+:root {
+    --hover: #fd7d1438; 
+    --sel: #fd7d147b;
+}
+   
+   /* table {
+     border-collapse: separate; 
+   } */
+   
+/* .ag-theme-alpine {
+     --ag-selected-row-background-color: var(--hover-bg);
+     --ag-row-hover-color: var(--hover-bg); 
+   } */
+
+.ag-row-hover {
+    --ag-row-hover-color: var(--hover)
+}
+
+.ag-row-selected {
+    --ag-selected-row-background-color: var(--sel);
+}
+
+
+.navbar {
+  font-size: 2rem;
+  margin-top: 1rem;
+}
+
+.navbar_small {
+  /* font-size: 1.25rem; */
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+/* .navbarhoriz {
+  margin-right: 0.5rem; 
+  padding-right: 0.5rem; 
+} */
+.navbarhoriz a {
+  margin-right: 0.5rem; 
+  padding-right: 0.5rem; 
+  border-right: 1px solid black; 
+}
+
+.navbarhoriz a:last-child {
+  border-right: none;
+}

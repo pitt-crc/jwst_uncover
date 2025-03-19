@@ -1,0 +1,24 @@
+services:
+  webapp:
+    image: uncover-webdv
+    container_name: dash-container
+    environment:
+      - REDIS_HOST=cache-container
+      - REDIS_PORT=6379
+      - DV_HOST=${DV_URL}
+      - DV_PORT=8020
+    build: .
+    ports:
+      - '443:8020'
+      - '80:8020'
+    depends_on:
+      - redis
+    volumes:
+      - ${DV_DATA_DIR}:/usr/local/app/assets/data:ro
+
+      
+  redis:
+    image: redis
+    container_name: cache-container
+    ports:
+      - "6379:6379"

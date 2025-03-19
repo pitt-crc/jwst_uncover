@@ -1,0 +1,8 @@
+numpy
+pandas
+astropy
+dash==2.9.2
+dash-ag-grid
+waitress
+flask-caching
+redis
