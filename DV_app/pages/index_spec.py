@@ -6,7 +6,7 @@ from dash import html
 
 from .utils_funcs import navbar_tables
 
-from .file_io import global_store, make_column_defs, clean_null_IDs
+from .file_io import global_store, make_column_defs
 
 _PAGE_FLAVOR = "Spec Sample"
 _VERS = "v1.1"
@@ -88,8 +88,6 @@ def setup_all(
 ):
     columnDefs = make_column_defs(dict_table_entries)
     df = global_store(fname_DF)
-
-    df = clean_null_IDs(df, keys=["id_DR3", "id_msa_epoch1", "id_msa_epoch2"])
 
     dash.register_page(
         __name__,

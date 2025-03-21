@@ -1,6 +1,7 @@
 # import dash
 
 from dash import html, dcc
+import numpy as np
 
 _FILTERS_RGB_TUPLES = [
     ["F115W+F150W", "F200W+F277W", "F356W+F410M+F444W"],
@@ -248,3 +249,111 @@ def navbar_overviews_phot():
             ),
         ]
     )
+
+
+def _make_info_entry(val, style_kwargs={}):
+    return html.Td(
+        val,
+        style={**_STYLES["info_entries"], **style_kwargs},
+    )
+
+
+def _make_info_entry_link(
+    val,
+    pathbase=None,
+):
+    if isinstance(val, np.ma.core.MaskedConstant):
+        entry = _make_info_entry(val)
+    elif val == -9999:
+        entry = _make_info_entry(val)
+    else:
+        entry = html.Td(
+            dcc.Link(
+                val,
+                href=f"{pathbase}{int(val)}.html",
+            ),
+            style={**_STYLES["info_entries"]},
+        )
+    return entry
+
+
+def _make_info_entries(
+    df,
+    ind,
+    dict_table_entries_full=None,
+    rowtype="labels",
+    keys_list=None,
+    key_crossref=None,
+    pathbase_crossref=None,
+):
+    if rowtype == "labels":
+        entries = []
+        for key in keys_list:
+            combine_tuple = False
+            if key in dict_table_entries_full.keys():
+                combine_tuple = dict_table_entries_full[key].get(
+                    "combine_tuple", False
+                )
+            if combine_tuple:
+                if key.split("_")[-1] == "50":
+                    lbl = "_".join(key.split("_")[:-1])
+                    lbl += dict_table_entries_full[key].get("label_extra", "")
+                    entries.append(
+                        _make_info_entry(
+                            lbl, style_kwargs={"font-weight": "600"}
+                        )
+                    )
+            else:
+                entries.append(
+                    _make_info_entry(key, style_kwargs={"font-weight": "600"})
+                )
+
+    elif rowtype == "entries":
+        entries = []
+
+        for key in keys_list:
+            fmt = None
+            if key in dict_table_entries_full.keys():
+                fmt = dict_table_entries_full[key].get("format", None)
+
+            combine_tuple = False
+            if key in dict_table_entries_full.keys():
+                combine_tuple = dict_table_entries_full[key].get(
+                    "combine_tuple", False
+                )
+            if combine_tuple:
+                if key.split("_")[-1] == "50":
+                    keybase = "_".join(key.split("_")[:-1])
+
+                    if fmt is not None:
+                        val50 = f"{df[keybase + '_50'][ind]:{fmt}}"
+                        val16 = f"{df[keybase + '_16'][ind]:{fmt}}"
+                        val84 = f"{df[keybase + '_84'][ind]:{fmt}}"
+                        val = f"{val50} [{val16}, {val84}]"
+                    else:
+                        val50 = f"{df[keybase + '_50'][ind]}"
+                        val16 = f"{df[keybase + '_16'][ind]}"
+                        val84 = f"{df[keybase + '_84'][ind]}"
+                        val = f"{val50} [{val16}, {val84}]"
+                else:
+                    val = None
+
+            else:
+                if fmt is not None:
+                    val = f"{df[key][ind]:{fmt}}"
+                else:
+                    val = df[key][ind]
+
+            if val is not None:
+                if key == key_crossref:
+                    entries.append(
+                        _make_info_entry_link(val, pathbase=pathbase_crossref)
+                    )
+
+                else:
+                    entries.append(_make_info_entry(val))
+
+    else:
+        raise ValueError
+
+    return entries

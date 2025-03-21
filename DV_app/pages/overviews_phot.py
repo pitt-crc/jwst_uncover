@@ -2,7 +2,9 @@ import pathlib
 import numpy as np
 
 import dash
-from dash import html, dcc
+
+# from dash import html, dcc
+from dash import html
 
 
 from .utils_funcs import (
@@ -11,6 +13,9 @@ from .utils_funcs import (
     _FILTERS_RGB_STR,
     _FILTERS_ALL,
     _IMGTYPES_MORPHOLOGEURS,
+    # _make_info_entry,
+    # _make_info_entry_link,
+    _make_info_entries,
 )
 
 from .file_io import global_store
@@ -122,120 +127,6 @@ for key in _keys_flt_trim:
 
 
 _DICT_TABLE_ENTRIES_FULL.update(_DICT_TABLE_ENTRIES_FULL_ADD)
-
-
-def _make_info_entries(
-    ind,
-    rowtype="labels",
-    keys_list=None,
-):
-    if rowtype == "labels":
-        entries = []
-        for key in keys_list:
-            combine_tuple = False
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                combine_tuple = _DICT_TABLE_ENTRIES_FULL[key].get(
-                    "combine_tuple", False
-                )
-            if combine_tuple:
-                if key.split("_")[-1] == "50":
-                    lbl = "_".join(key.split("_")[:-1])
-                    lbl += _DICT_TABLE_ENTRIES_FULL[key].get("label_extra", "")
-                    entries.append(
-                        html.Td(
-                            lbl,
-                            style={
-                                **_STYLES["info_entries"],
-                                "font-weight": "600",
-                            },
-                        )
-                    )
-            else:
-                entries.append(
-                    html.Td(
-                        key,
-                        style={
-                            **_STYLES["info_entries"],
-                            "font-weight": "600",
-                        },
-                    )
-                )
-
-    elif rowtype == "entries":
-        entries = []
-
-        for key in keys_list:
-            fmt = None
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                fmt = _DICT_TABLE_ENTRIES_FULL[key].get("format", None)
-
-            combine_tuple = False
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                combine_tuple = _DICT_TABLE_ENTRIES_FULL[key].get(
-                    "combine_tuple", False
-                )
-            if combine_tuple:
-                if key.split("_")[-1] == "50":
-                    keybase = "_".join(key.split("_")[:-1])
-
-                    if fmt is not None:
-                        val50 = f"{df[keybase + '_50'][ind]:{fmt}}"
-                        val16 = f"{df[keybase + '_16'][ind]:{fmt}}"
-                        val84 = f"{df[keybase + '_84'][ind]:{fmt}}"
-                        val = f"{val50} [{val16}, {val84}]"
-                    else:
-                        val50 = f"{df[keybase + '_50'][ind]}"
-                        val16 = f"{df[keybase + '_16'][ind]}"
-                        val84 = f"{df[keybase + '_84'][ind]}"
-                        val = f"{val50} [{val16}, {val84}]"
-                else:
-                    val = None
-
-            else:
-                if fmt is not None:
-                    val = f"{df[key][ind]:{fmt}}"
-                else:
-                    val = df[key][ind]
-
-            if val is not None:
-                if key == "id_spec":
-                    if isinstance(val, np.ma.core.MaskedConstant):
-                        entries.append(
-                            html.Td(
-                                val,
-                                style={**_STYLES["info_entries"]},
-                            )
-                        )
-                    elif val == -9999:
-                        entries.append(
-                            html.Td(
-                                val,
-                                style={**_STYLES["info_entries"]},
-                            )
-                        )
-                    else:
-                        entries.append(
-                            html.Td(
-                                dcc.Link(
-                                    val,
-                                    href=f"/overviews/spec/{int(val)}.html",
-                                ),
-                                style={**_STYLES["info_entries"]},
-                            )
-                        )
-
-                else:
-                    entries.append(
-                        html.Td(
-                            val,
-                            style={**_STYLES["info_entries"]},
-                        )
-                    )
-
-    else:
-        raise ValueError
-
-    return entries
 
 
 # def _make_sed_sfh_pz_entries(objid, objid_phot):
@@ -398,9 +289,16 @@ def layout(id="1.html", page_flavor=_PAGE_FLAVOR, vers=_VERS, **kwargs):
     for jj, keys_list in enumerate(_KEYS_INFO):
         for enttype in ["labels", "entries"]:
             entries_galprops[f"{enttype}_{jj}"] = _make_info_entries(
+                # ind,
+                # rowtype=enttype,
+                # keys_list=keys_list,
+                df,
                 ind,
+                dict_table_entries_full=_DICT_TABLE_ENTRIES_FULL,
                 rowtype=enttype,
                 keys_list=keys_list,
+                key_crossref="id_spec",
+                pathbase_crossref="/overviews/spec/",
             )
 
     overviewlayout = html.Div(

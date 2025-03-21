@@ -2,7 +2,9 @@ import pathlib
 import numpy as np
 
 import dash
-from dash import html, dcc
+
+# from dash import html, dcc
+from dash import html
 
 from .utils_funcs import (
     navbar_overviews_spec,
@@ -10,6 +12,9 @@ from .utils_funcs import (
     _FILTERS_RGB_STR,
     _FILTERS_ALL,
     _IMGTYPES_MORPHOLOGEURS,
+    # _make_info_entry,
+    # _make_info_entry_link,
+    _make_info_entries,
 )
 
 from .file_io import global_store
@@ -28,7 +33,8 @@ _VERS_PHOT = "DR3"
 
 path = pathlib.Path(__file__).parent.parent.resolve()
 _FNAME_DF = f"{path}/assets/data/df_sample_spec_full.fits"
-_DATA_PATH = "/assets/data/cutouts_spec/"
+_DATA_PATH_SPEC = "/assets/data/cutouts_spec/"
+_DATA_PATH_PHOT = "/assets/data/cutouts_phot/"
 
 
 df = global_store(_FNAME_DF)
@@ -129,113 +135,6 @@ for key in _keys_flt_trim:
 _DICT_TABLE_ENTRIES_FULL.update(_DICT_TABLE_ENTRIES_FULL_ADD)
 
 
-def _make_info_entries(
-    ind,
-    rowtype="labels",
-    keys_list=None,
-):
-    if rowtype == "labels":
-        entries = []
-        for key in keys_list:
-            combine_tuple = False
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                combine_tuple = _DICT_TABLE_ENTRIES_FULL[key].get(
-                    "combine_tuple", False
-                )
-            if combine_tuple:
-                if key.split("_")[-1] == "50":
-                    lbl = "_".join(key.split("_")[:-1])
-                    lbl += _DICT_TABLE_ENTRIES_FULL[key].get("label_extra", "")
-                    entries.append(
-                        html.Td(
-                            lbl,
-                            style={
-                                **_STYLES["info_entries"],
-                                "font-weight": "600",
-                            },
-                        )
-                    )
-            else:
-                entries.append(
-                    html.Td(
-                        key,
-                        style={
-                            **_STYLES["info_entries"],
-                            "font-weight": "600",
-                        },
-                    )
-                )
-
-    elif rowtype == "entries":
-        entries = []
-
-        for key in keys_list:
-            fmt = None
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                fmt = _DICT_TABLE_ENTRIES_FULL[key].get("format", None)
-
-            combine_tuple = False
-            if key in _DICT_TABLE_ENTRIES_FULL.keys():
-                combine_tuple = _DICT_TABLE_ENTRIES_FULL[key].get(
-                    "combine_tuple", False
-                )
-            if combine_tuple:
-                if key.split("_")[-1] == "50":
-                    keybase = "_".join(key.split("_")[:-1])
-
-                    if fmt is not None:
-                        val50 = f"{df[keybase + '_50'][ind]:{fmt}}"
-                        val16 = f"{df[keybase + '_16'][ind]:{fmt}}"
-                        val84 = f"{df[keybase + '_84'][ind]:{fmt}}"
-                        val = f"{val50} [{val16}, {val84}]"
-                    else:
-                        val50 = f"{df[keybase + '_50'][ind]}"
-                        val16 = f"{df[keybase + '_16'][ind]}"
-                        val84 = f"{df[keybase + '_84'][ind]}"
-                        val = f"{val50} [{val16}, {val84}]"
-                else:
-                    val = None
-
-            else:
-                if fmt is not None:
-                    val = f"{df[key][ind]:{fmt}}"
-                else:
-                    val = df[key][ind]
-
-            if val is not None:
-                if key == "id_DR3":
-                    if val == -9999:
-                        entries.append(
-                            html.Td(
-                                val,
-                                style={**_STYLES["info_entries"]},
-                            )
-                        )
-
-                    else:
-                        entries.append(
-                            html.Td(
-                                dcc.Link(
-                                    val,
-                                    href=f"/overviews/phot/{int(val)}.html",
-                                ),
-                                style={**_STYLES["info_entries"]},
-                            )
-                        )
-                else:
-                    entries.append(
-                        html.Td(
-                            val,
-                            style={**_STYLES["info_entries"]},
-                        )
-                    )
-
-    else:
-        raise ValueError
-
-    return entries
-
-
 def _make_sed_sfh_pz_entries(objid, objid_phot):
     entries = {}
 
@@ -244,7 +143,7 @@ def _make_sed_sfh_pz_entries(objid, objid_phot):
     entries["spec"] = [
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"spectra/specid_{objid}_spec.png",
+                src=_DATA_PATH_SPEC + f"spectra/specid_{objid}_spec.png",
                 alt=f"Spectrum for {objid}",
                 style={**_STYLES["plots_spec_IMG"]},
             ),
@@ -258,7 +157,7 @@ def _make_sed_sfh_pz_entries(objid, objid_phot):
         entries_sed_sfh_pz.append(
             html.Td(
                 html.Img(
-                    src=_DATA_PATH
+                    src=_DATA_PATH_PHOT
                     + f"seds/DR3_{objid_phot}_sed_{fluxtype}.png",
                     alt=f"SED/{fluxtype} for {objid}/ {_VERS_PHOT} {objid_phot}",
                     style={**_STYLES["plots_IMG"]},
@@ -269,7 +168,7 @@ def _make_sed_sfh_pz_entries(objid, objid_phot):
     entries_sed_sfh_pz.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"sfhs/DR3_{objid_phot}_SFH.png",
+                src=_DATA_PATH_PHOT + f"sfhs/DR3_{objid_phot}_SFH.png",
                 alt=f"SFH for {objid}/ {_VERS_PHOT} {objid_phot}",
                 style={**_STYLES["plots_IMG"]},
             ),
@@ -279,7 +178,7 @@ def _make_sed_sfh_pz_entries(objid, objid_phot):
     entries_sed_sfh_pz.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"Pzs/specid_{objid}_Pz.png",
+                src=_DATA_PATH_SPEC + f"Pzs/specid_{objid}_Pz.png",
                 alt=f"P(z) for {objid}/ {_VERS_PHOT} {objid_phot}",
                 style={**_STYLES["plots_IMG"]},
             ),
@@ -296,7 +195,7 @@ def _make_rgb_segmap_entries(objid):
     entries = [
         html.Td(
             html.Img(
-                src=_DATA_PATH
+                src=_DATA_PATH_SPEC
                 + f"RGB_stamps/PSF_BCG-MATCH/{objid}_{filt}.png",
                 alt=f"RGB {filt} postage stamp for {objid}",
                 style={**_STYLES["rgb_seg_stamps_IMG"]},
@@ -309,7 +208,8 @@ def _make_rgb_segmap_entries(objid):
     entries.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"RGB_stamps/PSF_BCG-MATCH/{objid}_MB.png",
+                src=_DATA_PATH_SPEC
+                + f"RGB_stamps/PSF_BCG-MATCH/{objid}_MB.png",
                 alt=f"RGB MB postage stamp for {objid}",
                 style={**_STYLES["rgb_seg_stamps_IMG"]},
             ),
@@ -320,7 +220,7 @@ def _make_rgb_segmap_entries(objid):
     entries.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"segmap_stamps/{objid}_segLW.png",
+                src=_DATA_PATH_SPEC + f"segmap_stamps/{objid}_segLW.png",
                 alt=f"Segmap postage stamp for {objid}",
                 style={**_STYLES["rgb_seg_stamps_IMG"]},
             ),
@@ -331,7 +231,7 @@ def _make_rgb_segmap_entries(objid):
     entries.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH + f"magmap_stamps/{objid}_magclosest.png",
+                src=_DATA_PATH_SPEC + f"magmap_stamps/{objid}_magclosest.png",
                 alt=f"Magnification postage stamp for {objid}",
                 style={**_STYLES["rgb_seg_stamps_IMG"]},
             ),
@@ -342,7 +242,7 @@ def _make_rgb_segmap_entries(objid):
     entries.append(
         html.Td(
             html.Img(
-                src=_DATA_PATH
+                src=_DATA_PATH_SPEC
                 + f"msa_shutter_stamps/{objid}_F444W_slitlets.png",
                 alt=f"Shutter postage stamp for {objid}",
                 style={**_STYLES["rgb_seg_stamps_IMG"]},
@@ -360,7 +260,7 @@ def _make_morph_stamp_entries(objid_phot, imgtype="img"):
             entries = [
                 html.Td(
                     html.Img(
-                        src=_DATA_PATH
+                        src=_DATA_PATH_PHOT
                         + f"morph_stamps/ID_DR3_{objid_phot}_F444W_{imgtype}.png",
                         alt="",
                         style={**_STYLES["pstamps_gallery_IMG"]},
@@ -373,7 +273,7 @@ def _make_morph_stamp_entries(objid_phot, imgtype="img"):
             entries = [
                 html.Td(
                     html.Img(
-                        src=_DATA_PATH
+                        src=_DATA_PATH_PHOT
                         + f"morph_stamps/ID_DR3_{objid_phot}_{filt}_{imgtype}.png",
                         alt="",
                         style={**_STYLES["pstamps_gallery_IMG"]},
@@ -432,10 +332,17 @@ def layout(id="1.html", page_flavor=_PAGE_FLAVOR, vers=_VERS, **kwargs):
     for jj, keys_list in enumerate(_KEYS_INFO):
         for enttype in ["labels", "entries"]:
             entries_galprops[f"{enttype}_{jj}"] = _make_info_entries(
-                # objid, objid_phot,
+                # # objid, objid_phot,
+                # ind,
+                # rowtype=enttype,
+                # keys_list=keys_list,
+                df,
                 ind,
+                dict_table_entries_full=_DICT_TABLE_ENTRIES_FULL,
                 rowtype=enttype,
                 keys_list=keys_list,
+                key_crossref="id_DR3",
+                pathbase_crossref="/overviews/phot/",
             )
 
     overviewlayout = html.Div(

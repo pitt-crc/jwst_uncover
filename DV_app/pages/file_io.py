@@ -5,7 +5,7 @@ import numpy as np
 
 from flask_caching import Cache
 
-from astropy.table import Table
+from astropy.table import Table, MaskedColumn
 
 
 import warnings
@@ -41,20 +41,33 @@ def make_column_defs(dict_table_entries):
 
 def get_table(fname_DF):
     splt = fname_DF.split(".")[0].split("_")
-    if splt[-1] == "full":
-        df = Table.read(fname_DF)
 
-    elif splt[-1] == "index":
-        df = Table.read(fname_DF).to_pandas()
+    df = Table.read(fname_DF)
+
+    if "id_msa_epoch1" in df.keys():
+        df = _clean_null_IDs(
+            df, keys=["id_DR3", "id_msa_epoch1", "id_msa_epoch2"]
+        )
+
+    if splt[-1] == "index":
+        df = df.to_pandas()
 
     return df
 
 
-def clean_null_IDs(df, keys=None, badval=-9999):
+def _clean_null_IDs(df, keys=None, badval=-9999):
     for key in keys:
         df[key] = np.array(df[key], dtype=np.float64)
 
-        df.loc[(df[key] == badval), key] = np.nan
+        df[key][(df[key] == badval)] = np.nan
+        # df.loc[(df[key] == badval), key] = np.nan
+
+        df[key] = MaskedColumn(
+            df[key],
+            name=key,
+            mask=(~np.isfinite(df[key])),
+            dtype=df[key].dtype,
+        )
 
     return df
 
