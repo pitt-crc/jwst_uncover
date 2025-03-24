@@ -9,8 +9,6 @@ services:
       - DV_PORT=8020
       
     ports:
-      - '443:8020'
-      - '80:8020'
       - '8080:8020'
     depends_on:
       - redis
