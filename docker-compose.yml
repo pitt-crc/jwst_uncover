@@ -1,16 +1,17 @@
 services:
   webapp:
     image: uncover-webdv
-    container_name: dash-container
+    container_name: dash
     environment:
-      - REDIS_HOST=cache-container
+      - REDIS_HOST=cache
       - REDIS_PORT=6379
       - DV_HOST=${DV_URL}
       - DV_PORT=8020
-    build: .
+      
     ports:
       - '443:8020'
       - '80:8020'
+      - '8080:8020'
     depends_on:
       - redis
     volumes:
@@ -19,6 +20,6 @@ services:
       
   redis:
     image: redis
-    container_name: cache-container
+    container_name: cache
     ports:
       - "6379:6379"
