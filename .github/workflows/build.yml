@@ -6,7 +6,7 @@ on:
 jobs:
   publish-docker:
     runs-on: ubuntu-latest
-    name: Docker Image
+    name: Build Docker
 
     steps:
       - name: Checkout source

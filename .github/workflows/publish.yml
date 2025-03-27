@@ -8,7 +8,7 @@ on:
 jobs:
   publish-docker:
     runs-on: ubuntu-latest
-    name: Docker Image
+    name: Publish Docker
 
     environment:
       name: ghcr
@@ -26,8 +26,8 @@ jobs:
         with:
           images: ghcr.io/sedonaprice/uncover_dv
           tags: |
-            type=sha
             type=raw,value=latest
+            type=raw,value=${{ github.sha }}
           labels: |
             org.opencontainers.image.title="JWST Uncover"
             org.opencontainers.image.description="Web frontend for the JWST Uncover project."
@@ -36,7 +36,7 @@ jobs:
             org.opencontainers.image.authors="The JWST Uncover Team"
             org.opencontainers.image.revision="${{ github.sha }}"
             org.opencontainers.image.vendor="University of Pittsburgh"
-            org.opencontainers.image.ref.name="ghcr.io/sedonaprice/uncover_dv:${{ inputs.version }}"
+            org.opencontainers.image.ref.name="ghcr.io/sedonaprice/uncover_dv:${{ github.sha }}"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
