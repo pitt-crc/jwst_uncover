@@ -26,7 +26,6 @@ jobs:
         with:
           images: ghcr.io/jwst-uncover/uncover_dv
           tags: |
-            type=raw,value=latest
             type=raw,value=${{ github.sha }}
           labels: |
             org.opencontainers.image.title="JWST Uncover"
@@ -60,3 +59,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
           platforms: linux/amd64,linux/arm64
+
+
+# type=raw,value=latest
