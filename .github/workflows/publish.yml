@@ -30,18 +30,6 @@ jobs:
           # Default: 'latest'
           ref: latest
 
-          # If a description is provided, the action will use it to create an annotated tag. If none is given, the action will create a lightweight tag.
-          # Default: ''
-          # description: Description for the tag
-
-          # Force-update a branch instead of using a tag.
-          # Default: false
-          force-branch: true
-
-          # Directory to use when executing git commands
-          # Default: '${{ github.workspace }}'
-          # git-directory: 'path/to/repo/dir'
-
       - name: Define Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -50,8 +38,8 @@ jobs:
         with:
           images: ghcr.io/jwst-uncover/uncover_dv
           tags: |
-            type=raw,value=latest
             type=raw,value=${{ github.sha }}
+            type=raw,value=latest
           labels: |
             org.opencontainers.image.title="JWST Uncover"
             org.opencontainers.image.description="Web frontend for the JWST UNCOVER data viewer."
