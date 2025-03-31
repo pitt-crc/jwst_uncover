@@ -6,14 +6,21 @@ on:
       - main
 
 jobs:
-  tag-latest:
-    name: Tag last commit 'latest'
+  publish-docker:
+    runs-on: ubuntu-latest
+    name: Publish Docker
 
     # permissions:
     #   contents: write
+    # permissions:
+    #   packages: write
+
+    environment:
+      name: ghcr
+      url: https://github.com/jwst-uncover/UNCOVER_DV_web/pkgs/container/uncover_dv
 
     steps:
-      - name: Run latest-tag
+      - name: Tag last commit 'latest'
         uses: EndBug/latest-tag@latest
         with:
           # You can change the name of the tag or branch with this input.
@@ -32,20 +39,6 @@ jobs:
           # Default: '${{ github.workspace }}'
           # git-directory: 'path/to/repo/dir'
 
-
-
-  publish-docker:
-    runs-on: ubuntu-latest
-    name: Publish Docker
-
-    # permissions:
-    #   packages: write
-
-    environment:
-      name: ghcr
-      url: https://github.com/jwst-uncover/UNCOVER_DV_web/pkgs/container/uncover_dv
-
-    steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
