@@ -20,6 +20,9 @@ jobs:
       url: https://github.com/jwst-uncover/UNCOVER_DV_web/pkgs/container/uncover_dv
 
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
       - name: Tag last commit 'latest'
         uses: EndBug/latest-tag@latest
         with:
@@ -38,9 +41,6 @@ jobs:
           # Directory to use when executing git commands
           # Default: '${{ github.workspace }}'
           # git-directory: 'path/to/repo/dir'
-
-      - name: Checkout source
-        uses: actions/checkout@v4
 
       - name: Define Docker metadata
         id: meta
